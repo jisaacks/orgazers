@@ -1,9 +1,15 @@
 https = require "https"
 express = require "express"
+fs = require "fs"
+jade = require "jade"
 app = express()
 
 app.get '/', (req, res) ->
-  res.send 'todo: add form here'
+  fs.readFile './form.jade', (err, contents) ->
+    throw err if err
+    fn = jade.compile contents
+    results = fn()
+    res.send results
 
 app.get '/for', (req, res) ->
   user = req.query["user"]
