@@ -57,6 +57,6 @@ getJSON = (path, callback) ->
     console.log 'error', e.message
 
 
-app.listen 3000
-
-console.log 'listening on port 3000'
+port = process.env.PORT or 5000
+app.listen port, ->
+  console.log "Listening on " + port
