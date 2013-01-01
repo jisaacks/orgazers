@@ -15,20 +15,23 @@ app.get '/for', (req, res) ->
   user = req.query["user"]
   repo = req.query["repo"]
   getWatchers user, repo, (users) ->
-    console.log "#{users.length} users are watching"
-    getRateLimit (data) ->
-      limit = data.rate.limit
-      remaining = data.rate.remaining
-      console.log "#{remaining} left of #{limit} API Requests Left"
-      if remaining < users.length
-        res.send "I do not have enough GitHub API Requests to process this request. I have #{remaining} but I need #{users.length}. Please try again later or use a repo with less stargazers."
-      else
-        getOrgs users, (orgs) ->
-          console.log "#{orgs.length} orgs are watching"
-          resp = ''
-          for org in orgs
-            resp += "<a href=\"https://github.com/#{org.user.login}\"><img title=\"#{org.login}\" width=\"80\" height=\"80\" src=\"#{org.avatar_url}\"></a>"
-          res.send "<body style=\"margin: 0\">#{resp}</body>"
+    if users.error
+      res.send users.error
+    else
+      console.log "#{users.length} users are watching"
+      getRateLimit (data) ->
+        limit = data.rate.limit
+        remaining = data.rate.remaining
+        console.log "#{remaining} left of #{limit} API Requests Left"
+        if remaining < users.length
+          res.send "I do not have enough GitHub API Requests to process this request. I have #{remaining} but I need #{users.length}. Please try again later or use a repo with less stargazers."
+        else
+          getOrgs users, (orgs) ->
+            console.log "#{orgs.length} orgs are watching"
+            resp = ''
+            for org in orgs
+              resp += "<a href=\"https://github.com/#{org.user.login}\"><img title=\"#{org.login}\" width=\"80\" height=\"80\" src=\"#{org.avatar_url}\"></a>"
+            res.send "<body style=\"margin: 0\">#{resp}</body>"
 
 
 getRateLimit = (callback) ->
@@ -57,8 +60,12 @@ getWatchers = (user, repo, callback) ->
     path = "/repos/#{user}/#{repo}/watchers?per_page=100&page=#{page}&client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
     getJSON path, (data) ->
       if data.length
-        Array::push.apply users, data
-        watchers(page+1)
+        if data.message and /API Rate Limit Exceeded/.test(data.message)
+          # We have run out of API requests.
+          callback error: "I am out of GitHub API requests. I can no longer process this request at this time. Please try again later."
+        else  
+          Array::push.apply users, data
+          watchers(page+1)
       else
         callback(users)
   watchers(1)
