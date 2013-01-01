@@ -9,20 +9,23 @@ app.get '/', (req, res) ->
       console.log "#{orgs.length} orgs are watching"
       resp = ''
       for org in orgs
-        resp += "<div><img src=\"#{org.avatar_url}\"></div>"
+        resp += "<a href=\"https://github.com/#{org.user.login}\"><img title=\"#{org.login}\" width=\"80\" height=\"80\" src=\"#{org.avatar_url}\"></a>"
       res.send resp
-      
+
 
 getOrgs = (users, callback) ->
   orgs = []
   done = 0
-  for user in users
+  _orgs = (user) ->
     path = user.organizations_url + "?client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
     getJSON path, (data) ->
-      Array::push.apply orgs, data if data.length
+      if data.length
+        org.user = user for org in data
+        Array::push.apply orgs, data
       done += 1
       if done == users.length
         callback orgs
+  _orgs user for user in users
 
 
 getWatchers = (user, repo, callback) ->
