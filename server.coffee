@@ -3,7 +3,12 @@ express = require "express"
 app = express()
 
 app.get '/', (req, res) ->
-  getWatchers 'jisaacks', 'GitGutter', (users) ->
+  res.send 'todo: add form here'
+
+app.get '/for', (req, res) ->
+  user = req.query["user"]
+  repo = req.query["repo"]
+  getWatchers user, repo, (users) ->
     console.log "#{users.length} users are watching"
     getOrgs users, (orgs) ->
       console.log "#{orgs.length} orgs are watching"
