@@ -10,7 +10,7 @@ app.get '/', (req, res) ->
       resp = ''
       for org in orgs
         resp += "<a href=\"https://github.com/#{org.user.login}\"><img title=\"#{org.login}\" width=\"80\" height=\"80\" src=\"#{org.avatar_url}\"></a>"
-      res.send resp
+      res.send "<body style=\"margin: 0\">#{resp}</body>"
 
 
 getOrgs = (users, callback) ->
