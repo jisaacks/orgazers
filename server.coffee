@@ -41,7 +41,11 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'for', (data) ->
     user = data.user
     repo = data.repo
-    callback = (users) ->
+    orgsCallback = (orgs) ->
+      socket.emit 'finished', orgs: orgs
+    orgStatusCallback = (count) ->
+      socket.emit 'status', message: "Found #{count} orgs..."
+    usersCallback = (users) ->
       if users.error
         socket.emit 'status', message: users.error
       else
@@ -55,11 +59,10 @@ io.sockets.on 'connection', (socket) ->
             to process this request. I have #{remaining} but I need #{users.length}. 
             Please try again later or use a repo with less stargazers."
           else
-            getOrgs users, (orgs) ->
-              socket.emit 'finished', orgs: orgs
-    statusCallback = (count) ->
+            getOrgs users, orgsCallback, orgStatusCallback
+    usersStatusCallback = (count) ->
       socket.emit 'status', message: "Found #{count} users..."
-    getWatchers user, repo, callback, statusCallback
+    getWatchers user, repo, usersCallback, usersStatusCallback
 
 
 getRateLimit = (callback) ->
@@ -67,7 +70,7 @@ getRateLimit = (callback) ->
   getJSON path, (data) ->
     callback data
 
-getOrgs = (users, callback) ->
+getOrgs = (users, callback, statusCallback) ->
   orgs = []
   done = 0
   skipping = 0
@@ -77,6 +80,7 @@ getOrgs = (users, callback) ->
       if data.length
         org.user = user for org in data
         Array::push.apply orgs, data
+        statusCallback orgs.length
       done += 1
       if done == users.length - skipping
         console.log "done"
