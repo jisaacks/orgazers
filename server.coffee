@@ -33,6 +33,10 @@ app.get '/for', (req, res) ->
       repo: repo
     res.send results
 
+io.configure -> 
+  io.set "transports", ["xhr-polling"]
+  io.set "polling duration", 10
+
 io.sockets.on 'connection', (socket) ->
   socket.on 'for', (data) ->
     user = data.user
