@@ -2,7 +2,11 @@ doctype 5
 html(lang="en")
   head
     title Orgazers
-    script(src='/javascripts/jquery.js')
+    link(rel='stylesheet', href='/css/bootstrap.css')
+    link(rel='stylesheet', href='/css/bootstrap-responsive.css')
+    link(rel='stylesheet', href='/css/main.css')
+    script(src='/js/jquery.js')
+    script(src='/js/bootstrap.js')
     script(src='/socket.io/socket.io.js')
     script(type='text/javascript')
       var socket = io.connect('http://localhost:5000');
@@ -20,6 +24,16 @@ html(lang="en")
         }
       });
       socket.emit('for', { user: "#{user}", repo: "#{repo}" });
-  body(style='margin: 0')
+  body
+    .container
+      .navbar
+        .navbar-inner
+          a.brand(href='/') Orgazers
+          //form.navbar-form.pull-left(action="for")
+          //  span User
+          //  input(type="text", name="user")
+          //  span Repo
+          //  input(type="text", name="repo")
+          //  input.btn(type="submit", value="Submit")
     div#status(style='margin: 200px; text-align: center; font-size: 24px;') Working...
     div#orgs

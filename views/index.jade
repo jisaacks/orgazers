@@ -1,11 +1,26 @@
-form(action="for")
-  div User
-  div
-    input(type="text", name="user")
-  hr
-  div Repo
-  div
-    input(type="text", name="repo")
-  hr
-  div
-    input(type="submit", value="Submit")
+doctype 5
+html(lang="en")
+  head
+    title Orgazers
+    link(rel='stylesheet', href='/css/bootstrap.css')
+    link(rel='stylesheet', href='/css/bootstrap-responsive.css')
+    link(rel='stylesheet', href='/css/main.css')
+    script(src='/js/jquery.js')
+    script(src='/js/bootstrap.js')
+
+  body
+    .container
+      .navbar
+        .navbar-inner
+          .brand Orgazers
+      form.for(action="for")
+        div User
+        div
+          input(type="text", name="user")
+        hr
+        div Repo
+        div
+          input(type="text", name="repo")
+        hr
+        div
+          input.btn(type="submit", value="Submit")
