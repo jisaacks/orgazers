@@ -74,6 +74,9 @@ getOrgs = (users, callback) ->
       _orgs user
     else
       skipping += 1
+      if user.public_members_url
+        user.user = login: user.login
+        orgs.push user
       console.log "Skipping #{user.login}"
 
 
