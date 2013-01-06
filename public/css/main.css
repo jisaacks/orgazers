@@ -4,6 +4,9 @@ body {
 .container {
   width: 100%;
 }
+.container.tiles {
+  background: url(/img/tiles.png);
+}
 .navbar {
   margin-bottom: 0px;
 }
