@@ -1,11 +1,11 @@
 body {
   margin: 0;
 }
+body.tiles {
+  background: url(/img/tiles.png);
+}
 .container {
   width: 100%;
-}
-.container.tiles {
-  background: url(/img/tiles.png);
 }
 .navbar {
   margin-bottom: 0px;
