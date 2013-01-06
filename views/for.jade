@@ -19,7 +19,7 @@ html(lang="en")
         var $org, org, _i, _len;
         for (_i = 0, _len = orgs.length; _i < _len; _i++) {
           org = orgs[_i];
-          $org = $("<a href=\"https://github.com/" + org.user.login + "\"><img title=\"" + org.login + "\" width=\"80\" height=\"80\" src=\"" + org.avatar_url + "\"></a>");
+          $org = $("<a target=\"_blank\" href=\"https://github.com/" + org.user.login + "\"><img title=\"" + org.login + "\" width=\"80\" height=\"80\" src=\"" + org.avatar_url + "\"></a>");
           $("#orgs").append($org);
         }
       });
