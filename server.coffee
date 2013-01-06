@@ -34,7 +34,7 @@ io.sockets.on 'connection', (socket) ->
   socket.on 'for', (data) ->
     user = data.user
     repo = data.repo
-    getWatchers user, repo, (users) ->
+    callback = (users) ->
       if users.error
         socket.emit 'status', message: users.error
       else
@@ -48,6 +48,9 @@ io.sockets.on 'connection', (socket) ->
           else
             getOrgs users, (orgs) ->
               socket.emit 'finished', orgs: orgs
+    statusCallback = (count) ->
+      socket.emit 'status', message: "Found #{count} users..."
+    getWatchers user, repo, callback, statusCallback
 
 
 getRateLimit = (callback) ->
@@ -80,7 +83,7 @@ getOrgs = (users, callback) ->
       console.log "Skipping #{user.login}"
 
 
-getWatchers = (user, repo, callback) ->
+getWatchers = (user, repo, callback, statusCallback) ->
   users = []
   watchers = (page) ->
     path = "/repos/#{user}/#{repo}/watchers?per_page=100&page=#{page}&client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
@@ -91,6 +94,7 @@ getWatchers = (user, repo, callback) ->
           callback error: "I am out of GitHub API requests. I can no longer process this request at this time. Please try again later."
         else  
           Array::push.apply users, data
+          statusCallback users.length
           watchers(page+1)
       else
         callback(users)
