@@ -3,7 +3,7 @@ jade    = require "jade"
 express = require "express"
 https   = require "https"
 sockio  = require "socket.io"
-statica = require('static-asset')
+statica = require "static-asset"
 
 app     = express()
 port    = process.env.PORT or 5000
