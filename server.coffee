@@ -1,11 +1,19 @@
-https = require "https"
+fs      = require "fs"
+jade    = require "jade"
 express = require "express"
-fs = require "fs"
-jade = require "jade"
-app = express()
+https   = require "https"
+sockio  = require "socket.io"
+statica = require('static-asset')
+
+app     = express()
+port    = process.env.PORT or 5000
+server  = app.listen port, -> console.log "Listening on " + port
+io      = sockio.listen server
+
+app.use statica("/public/")
 
 app.get '/', (req, res) ->
-  fs.readFile './form.jade', (err, contents) ->
+  fs.readFile './views/index.jade', (err, contents) ->
     throw err if err
     fn = jade.compile contents
     results = fn()
@@ -14,24 +22,32 @@ app.get '/', (req, res) ->
 app.get '/for', (req, res) ->
   user = req.query["user"]
   repo = req.query["repo"]
-  getWatchers user, repo, (users) ->
-    if users.error
-      res.send users.error
-    else
-      console.log "#{users.length} users are watching"
-      getRateLimit (data) ->
-        limit = data.rate.limit
-        remaining = data.rate.remaining
-        console.log "#{remaining} left of #{limit} API Requests Left"
-        if remaining < users.length
-          res.send "I do not have enough GitHub API Requests to process this request. I have #{remaining} but I need #{users.length}. Please try again later or use a repo with less stargazers."
-        else
-          getOrgs users, (orgs) ->
-            console.log "#{orgs.length} orgs are watching"
-            resp = ''
-            for org in orgs
-              resp += "<a href=\"https://github.com/#{org.user.login}\"><img title=\"#{org.login}\" width=\"80\" height=\"80\" src=\"#{org.avatar_url}\"></a>"
-            res.send "<body style=\"margin: 0\">#{resp}</body>"
+  fs.readFile './views/for.jade', (err, contents) ->
+    throw err if err
+    fn = jade.compile contents
+    results = fn
+      user: user
+      repo: repo
+    res.send results
+
+io.sockets.on 'connection', (socket) ->
+  socket.on 'for', (data) ->
+    user = data.user
+    repo = data.repo
+    getWatchers user, repo, (users) ->
+      if users.error
+        socket.emit 'status', message: users.error
+      else
+        socket.emit 'status', message: "Found #{users.length} users..."
+        getRateLimit (data) ->
+          limit = data.rate.limit
+          remaining = data.rate.remaining
+          console.log "#{remaining} left of #{limit} API Requests Left"
+          if remaining < users.length
+            socket.emit 'status', message: "I do not have enough GitHub API Requests to process this request. I have #{remaining} but I need #{users.length}. Please try again later or use a repo with less stargazers."
+          else
+            getOrgs users, (orgs) ->
+              socket.emit 'finished', orgs: orgs
 
 
 getRateLimit = (callback) ->
@@ -85,8 +101,3 @@ getJSON = (path, callback) ->
       callback json_data
   req.on 'error', (e) ->
     console.log 'error', e.message
-
-
-port = process.env.PORT or 5000
-app.listen port, ->
-  console.log "Listening on " + port
