@@ -12,6 +12,8 @@ io      = sockio.listen server
 
 app.use statica("/public/")
 
+authstr = "client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
+
 app.get '/', (req, res) ->
   fs.readFile './views/index.jade', (err, contents) ->
     throw err if err
@@ -44,7 +46,9 @@ io.sockets.on 'connection', (socket) ->
           remaining = data.rate.remaining
           console.log "#{remaining} left of #{limit} API Requests Left"
           if remaining < users.length
-            socket.emit 'status', message: "I do not have enough GitHub API Requests to process this request. I have #{remaining} but I need #{users.length}. Please try again later or use a repo with less stargazers."
+            socket.emit 'status', message: "I do not have enough GitHub API Requests 
+            to process this request. I have #{remaining} but I need #{users.length}. 
+            Please try again later or use a repo with less stargazers."
           else
             getOrgs users, (orgs) ->
               socket.emit 'finished', orgs: orgs
@@ -54,7 +58,7 @@ io.sockets.on 'connection', (socket) ->
 
 
 getRateLimit = (callback) ->
-  path = "/rate_limit?client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
+  path = "/rate_limit?#{authstr}"
   getJSON path, (data) ->
     callback data
 
@@ -63,7 +67,7 @@ getOrgs = (users, callback) ->
   done = 0
   skipping = 0
   _orgs = (user) ->
-    path = user.organizations_url + "?client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
+    path = user.organizations_url + "?#{authstr}"
     getJSON path, (data) ->
       if data.length
         org.user = user for org in data
@@ -86,12 +90,13 @@ getOrgs = (users, callback) ->
 getWatchers = (user, repo, callback, statusCallback) ->
   users = []
   watchers = (page) ->
-    path = "/repos/#{user}/#{repo}/watchers?per_page=100&page=#{page}&client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
+    path = "/repos/#{user}/#{repo}/watchers?per_page=100&page=#{page}&#{authstr}"
     getJSON path, (data) ->
       if data.length
         if data.message and /API Rate Limit Exceeded/.test(data.message)
           # We have run out of API requests.
-          callback error: "I am out of GitHub API requests. I can no longer process this request at this time. Please try again later."
+          callback error: "I am out of GitHub API requests. I can no longer process 
+          this request at this time. Please try again later."
         else  
           Array::push.apply users, data
           statusCallback users.length
