@@ -10,7 +10,8 @@ port    = process.env.PORT or 5000
 server  = app.listen port, -> console.log "Listening on " + port
 io      = sockio.listen server
 
-app.use statica("/public/")
+app.use statica(__dirname + "/public/")
+app.use express.static(__dirname + "/public/")
 
 authstr = "client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
 
