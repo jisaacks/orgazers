@@ -58,6 +58,7 @@ getRateLimit = (callback) ->
 getOrgs = (users, callback) ->
   orgs = []
   done = 0
+  skipping = 0
   _orgs = (user) ->
     path = user.organizations_url + "?client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
     getJSON path, (data) ->
@@ -65,9 +66,15 @@ getOrgs = (users, callback) ->
         org.user = user for org in data
         Array::push.apply orgs, data
       done += 1
-      if done == users.length
+      if done == users.length - skipping
+        console.log "done"
         callback orgs
-  _orgs user for user in users
+  for user in users
+    if user.type == "User"
+      _orgs user
+    else
+      skipping += 1
+      console.log "Skipping #{user.login}"
 
 
 getWatchers = (user, repo, callback) ->
