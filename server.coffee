@@ -4,6 +4,7 @@ express = require "express"
 https   = require "https"
 sockio  = require "socket.io"
 statica = require "static-asset"
+qrystr  = require('querystring')
 
 app     = express()
 port    = process.env.PORT or 5000
@@ -32,6 +33,37 @@ app.get '/for', (req, res) ->
       user: user
       repo: repo
     res.send results
+
+app.get '/oauth_callback', (req, resp) ->
+  code = req.query["code"]
+  console.log 'response', 'code', code
+  options =
+   host: 'github.com'
+   port: 443
+   path: '/login/oauth/access_token'
+   method: 'POST'
+  data = ''
+  req = https.request options, (res) ->
+    res.on 'data', (chunk) ->
+      data += chunk
+    res.on 'end', ->
+      obj = qrystr.parse data
+      access_token = obj.access_token
+      token_type = obj.token_type
+      console.log 'access_token', access_token
+      # need to store access token here
+      resp.writeHead 302, 'Location': '/'
+      resp.end()
+  req.on 'error', (e) ->
+    console.log 'error', e.message
+  req.write "#{authstr}&code=#{code}"
+  req.end()
+
+app.get '/github', (req, res) ->
+  url = 'https://github.com/login/oauth/authorize'
+  url += "?client_id=#{process.env.OAUTH_CLIENT_ID}"
+  res.writeHead 302, 'Location': url
+  res.end()
 
 io.configure -> 
   io.set "transports", ["xhr-polling"]
