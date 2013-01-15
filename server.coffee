@@ -4,7 +4,7 @@ express = require "express"
 https   = require "https"
 sockio  = require "socket.io"
 statica = require "static-asset"
-qrystr  = require('querystring')
+qrystr  = require "querystring"
 
 app     = express()
 port    = process.env.PORT or 5000
@@ -13,17 +13,32 @@ io      = sockio.listen server
 
 app.use statica(__dirname + "/public/")
 app.use express.static(__dirname + "/public/")
+app.use express.cookieParser()
 
-authstr = "client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
+cookies = {}
+
+gotauth = ->
+  return cookies.access_token?
+
+authstr = ->
+  if gotauth()
+    "access_token=#{cookies.access_token}"
+  else
+    "client_id=#{process.env.OAUTH_CLIENT_ID}&client_secret=#{process.env.OAUTH_CLIENT_SECRET}"
 
 app.get '/', (req, res) ->
+  cookies = req.cookies
   fs.readFile './views/index.jade', (err, contents) ->
     throw err if err
     fn = jade.compile contents
-    results = fn()
+    results = fn loggedIn: gotauth()
+    console.log req.cookies.access_token
+    console.log 'cookies', req.cookies.access_token
+    console.log 'authstr', authstr()
     res.send results
 
 app.get '/for', (req, res) ->
+  cookies = req.cookies
   user = req.query["user"]
   repo = req.query["repo"]
   fs.readFile './views/for.jade', (err, contents) ->
@@ -52,11 +67,12 @@ app.get '/oauth_callback', (req, resp) ->
       token_type = obj.token_type
       console.log 'access_token', access_token
       # need to store access token here
+      resp.cookie 'access_token', access_token, expires: 0, httpOnly: true
       resp.writeHead 302, 'Location': '/'
       resp.end()
   req.on 'error', (e) ->
     console.log 'error', e.message
-  req.write "#{authstr}&code=#{code}"
+  req.write "#{authstr()}&code=#{code}"
   req.end()
 
 app.get '/github', (req, res) ->
@@ -98,7 +114,7 @@ io.sockets.on 'connection', (socket) ->
 
 
 getRateLimit = (callback) ->
-  path = "/rate_limit?#{authstr}"
+  path = "/rate_limit?#{authstr()}"
   getJSON path, (data) ->
     callback data
 
@@ -107,7 +123,7 @@ getOrgs = (users, callback, statusCallback) ->
   done = 0
   skipping = 0
   _orgs = (user) ->
-    path = user.organizations_url + "?#{authstr}"
+    path = user.organizations_url + "?#{authstr()}"
     getJSON path, (data) ->
       if data.length
         org.user = user for org in data
@@ -131,7 +147,7 @@ getOrgs = (users, callback, statusCallback) ->
 getWatchers = (user, repo, callback, statusCallback) ->
   users = []
   watchers = (page) ->
-    path = "/repos/#{user}/#{repo}/watchers?per_page=100&page=#{page}&#{authstr}"
+    path = "/repos/#{user}/#{repo}/watchers?per_page=100&page=#{page}&#{authstr()}"
     getJSON path, (data) ->
       if data.length
         if data.message and /API Rate Limit Exceeded/.test(data.message)
