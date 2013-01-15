@@ -32,15 +32,12 @@ app.get '/', (req, res) ->
     throw err if err
     fn = jade.compile contents
     results = fn loggedIn: gotauth()
-    console.log req.cookies.access_token
-    console.log 'cookies', req.cookies.access_token
-    console.log 'authstr', authstr()
     res.send results
 
 app.get '/for', (req, res) ->
   cookies = req.cookies
-  user = req.query["user"]
-  repo = req.query["repo"]
+  user    = req.query["user"]
+  repo    = req.query["repo"]
   fs.readFile './views/for.jade', (err, contents) ->
     throw err if err
     fn = jade.compile contents
@@ -51,7 +48,6 @@ app.get '/for', (req, res) ->
 
 app.get '/oauth_callback', (req, resp) ->
   code = req.query["code"]
-  console.log 'response', 'code', code
   options =
    host: 'github.com'
    port: 443
@@ -65,8 +61,6 @@ app.get '/oauth_callback', (req, resp) ->
       obj = qrystr.parse data
       access_token = obj.access_token
       token_type = obj.token_type
-      console.log 'access_token', access_token
-      # need to store access token here
       resp.cookie 'access_token', access_token, expires: 0, httpOnly: true
       resp.writeHead 302, 'Location': '/'
       resp.end()
