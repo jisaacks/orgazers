@@ -31,8 +31,18 @@ app.get '/', (req, res) ->
   fs.readFile './views/index.jade', (err, contents) ->
     throw err if err
     fn = jade.compile contents
-    results = fn loggedIn: gotauth()
-    res.send results
+    getRateLimit (data) ->
+      if gotauth()
+        limit = data.rate.limit
+        remaining = data.rate.remaining
+      else
+        limit = 100
+        remaining = 100
+      results = fn
+        loggedIn: gotauth()
+        limit: limit
+        remaining: remaining
+      res.send results
 
 app.get '/for', (req, res) ->
   cookies = req.cookies
@@ -96,6 +106,8 @@ io.sockets.on 'connection', (socket) ->
           limit = data.rate.limit
           remaining = data.rate.remaining
           console.log "#{remaining} left of #{limit} API Requests Left"
+          unless gotauth() or remaining < 100
+            remaining = 100
           if remaining < users.length
             socket.emit 'status', message: "I do not have enough GitHub API Requests 
             to process this request. I have #{remaining} but I need #{users.length}. 

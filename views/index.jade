@@ -14,10 +14,17 @@ html(lang="en")
         .navbar-inner
           .brand Orgazers
       form.for(action="for")
-        if loggedIn
-            span You are logged in
+        .login
+          if loggedIn
+            img.github-logo(src="/img/octocat.png", width="20")
+            span logged in
           else
-            a(href="/github") please log in
+            strong You are limited to repos with #{remaining} orgs
+            br
+            span login with
+            a(href="/github")
+              img.github-logo(src="/img/octocat.png", width="20")
+            span to get raise your limit
         div
           input(type="text", name="user", placeholder="User")
         hr

@@ -34,14 +34,35 @@ body.tiles {
 form.for {
   background: #eee;
   padding: 50px;
+  padding-top: 80px;
   margin: 100px auto;
   width: 220px;
   border: 3px solid white;
   border-radius: 6px;
   box-shadow: 0px 0px 4px #999;
+  position: relative;
 }
 form.for input.btn {
   font-size: 18px;
   width: 100%;
   line-height: 30px;
+}
+form.for .login {
+  text-align: center;
+  background: #03afe5;
+  color: white;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 310px;
+  padding: 5px;
+  font-size: 12px;
+  color: #555;
+  border-bottom: 2px solid white;
+  background: #F6F6F6;
+}
+form.for .login .github-logo {
+  border-radius: 4px;
+  margin: 0 5px;
+  background-color: #13bff5;
 }
