@@ -85,6 +85,11 @@ app.get '/github', (req, res) ->
   res.writeHead 302, 'Location': url
   res.end()
 
+app.get '/logout', (req, res) ->
+  res.clearCookie 'access_token'
+  res.writeHead 302, 'Location': '/'
+  res.end()
+
 io.configure -> 
   io.set "transports", ["xhr-polling"]
   io.set "polling duration", 10
