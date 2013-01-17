@@ -35,14 +35,19 @@ app.get '/', (req, res) ->
       if gotauth()
         limit = data.rate.limit
         remaining = data.rate.remaining
+        getJSON "/user?#{authstr()}", (user) ->
+          console.log user
+          results = fn
+            limit:        limit
+            remaining:    remaining
+            current_user: user
+          res.send results
       else
-        limit = 100
-        remaining = 100
-      results = fn
-        loggedIn: gotauth()
-        limit: limit
-        remaining: remaining
-      res.send results
+        results = fn
+          limit:        100
+          remaining:    100
+          current_user: false
+        res.send results
 
 app.get '/for', (req, res) ->
   cookies = req.cookies

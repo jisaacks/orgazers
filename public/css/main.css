@@ -47,8 +47,7 @@ form.for input.btn {
   width: 100%;
   line-height: 30px;
 }
-form.for .login {
-  text-align: center;
+form.for .login, form.for .logout {
   background: #03afe5;
   color: white;
   position: absolute;
@@ -61,8 +60,28 @@ form.for .login {
   border-bottom: 2px solid white;
   background: #F6F6F6;
 }
-form.for .login .github-logo {
+form.for .login {
+  text-align: center;
+}
+form.for .logout {
+  line-height: 16px;
+}
+form.for .login img {
   border-radius: 4px;
   margin: 0 5px;
   background-color: #13bff5;
+}
+form.for .logout img {
+  float: left;
+  margin-left: 100px !important;
+  border-radius: 4px;
+  margin: 0 5px;
+}
+form.for .logout strong {
+  display: block;
+  margin-top: 3px;
+}
+form.for .logout a {
+  color: #999;
+  font-style: italic;
 }

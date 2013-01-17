@@ -14,16 +14,18 @@ html(lang="en")
         .navbar-inner
           .brand Orgazers
       form.for(action="for")
-        .login
-          if loggedIn
-            img.github-logo(src="/img/octocat.png", width="20")
-            span logged in
-          else
+        if current_user
+          .logout
+            img(src=current_user.avatar_url, width="40")
+            strong #{current_user.login}
+            a(href="/logout") Sign out
+        else
+          .login
             strong You are limited to repos with #{remaining} stargazers
             br
             span login with
             a(href="/github")
-              img.github-logo(src="/img/octocat.png", width="20")
+              img(src="/img/octocat.png", width="20")
             span to get raise your limit
         div
           input(type="text", name="user", placeholder="User")
