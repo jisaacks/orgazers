@@ -74,7 +74,7 @@ form.for .login img {
 form.for .logout img {
   float: left;
   margin-left: 100px !important;
-  border-radius: 4px;
+  border-radius: 24px;
   margin: 0 5px;
 }
 form.for .logout strong {
