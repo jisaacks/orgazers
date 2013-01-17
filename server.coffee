@@ -37,16 +37,20 @@ app.get '/', (req, res) ->
         remaining = data.rate.remaining
         getJSON "/user?#{authstr()}", (user) ->
           console.log user
-          results = fn
-            limit:        limit
-            remaining:    remaining
-            current_user: user
-          res.send results
+          console.log "#{user.repos_url}?#{authstr()}"
+          getJSON "#{user.repos_url}?#{authstr()}", (repos) ->
+            results = fn
+              limit:        limit
+              remaining:    remaining
+              current_user: user
+              repos:        repos
+            res.send results
       else
         results = fn
           limit:        100
           remaining:    100
-          current_user: false
+          current_user: null
+          repos:        null
         res.send results
 
 app.get '/for', (req, res) ->

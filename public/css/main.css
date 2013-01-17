@@ -85,3 +85,48 @@ form.for .logout a {
   color: #999;
   font-style: italic;
 }
+form.for .logout span.repos-btn {
+  background: #ddd;
+  padding: 1px 3px;
+  border-radius: 0 0 4px 4px;
+  color: #999;
+  text-shadow: 1px 1px 1px #eee;
+  position: absolute;
+  top: 100%;
+  left: 108px;
+  border-top: 2px solid white;
+}
+form.for .logout span.repos-btn:hover {
+  cursor: pointer;
+  color: #666;
+}
+form.for .logout ul.repos {
+  max-height: 275px;
+  overflow: scroll;
+  list-style: none;
+  clear: left;
+  margin: 0;
+  margin-bottom: -5px;
+  border: 2px solid white;
+  border-bottom: none;
+  display: none;
+}
+form.for .logout ul.repos a {
+  display: block;
+  padding: 3px;
+  padding-left: 8px;
+  background: #aaa;
+  border-top: 1px solid #ccc;
+  text-decoration: none;
+  color: #777;
+  text-shadow: 1px 1px 1px #bbb;
+}
+form.for .logout ul.repos a:hover {
+  background: #bbb;
+}
+.show-repos:before {
+  content: '▼ ';
+}
+.hide-repos:before {
+  content: '▲ ';
+}

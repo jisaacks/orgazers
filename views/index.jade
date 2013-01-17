@@ -7,6 +7,18 @@ html(lang="en")
     link(rel='stylesheet', href='/css/main.css')
     script(src='/js/jquery.js')
     script(src='/js/bootstrap.js')
+    script(src='/js/underscore.js')
+    script(type='text/javascript')
+      $(function(){
+        $(".for").on('click', ".show-repos", function(){
+          $('.repos').slideDown()
+          $(this).removeClass('show-repos').addClass('hide-repos');
+        });
+        $(".for").on('click', ".hide-repos", function(){
+          $('.repos').slideUp()
+          $(this).removeClass('hide-repos').addClass('show-repos');
+        });
+      })
 
   body.tiles
     .container
@@ -19,6 +31,13 @@ html(lang="en")
             img(src=current_user.avatar_url, width="40")
             strong #{current_user.login}
             a(href="/logout") Sign out
+            - if (repos.length)
+              ul.repos
+                - repos.forEach(function(repo){
+                  li
+                    a(href="/for?user=#{current_user.login}&repo=#{repo.name}")= repo.name
+                - })
+              span.repos-btn.show-repos My Repositories
         else
           .login
             strong You are limited to repos with #{remaining} stargazers
