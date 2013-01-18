@@ -111,7 +111,7 @@ form.for .logout ul.repos {
   border-bottom: none;
   display: none;
 }
-form.for .logout ul.repos a {
+form.for .logout ul.repos a, form.for .logout ul.repos span.no-watchers {
   display: block;
   padding: 3px;
   padding-left: 8px;
@@ -122,6 +122,9 @@ form.for .logout ul.repos a {
   text-shadow: 1px 1px 1px #f5f5f5;
   font-size: 18px;
   line-height: 28px;
+}
+form.for .logout ul.repos span.no-watchers {
+  color: #ccc;
 }
 form.for .logout ul.repos a:hover {
   background: #eee;

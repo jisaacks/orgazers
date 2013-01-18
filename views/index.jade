@@ -18,6 +18,7 @@ html(lang="en")
           $('.repos').slideUp()
           $(this).removeClass('hide-repos').addClass('show-repos');
         });
+        $("span.no-watchers").tooltip({placement: 'left', title: 'No Stargazers'})
       })
 
   body.tiles
@@ -35,7 +36,10 @@ html(lang="en")
               ul.repos
                 - repos.forEach(function(repo){
                   li
-                    a(href="/for?user=#{current_user.login}&repo=#{repo.name}")= repo.name
+                    - if (repo.watchers == 0)
+                      span.no-watchers= repo.name
+                    - else
+                      a(href="/for?user=#{current_user.login}&repo=#{repo.name}")= repo.name
                 - })
               span.repos-btn.show-repos My Repositories
         else
