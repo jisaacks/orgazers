@@ -108,14 +108,19 @@ io.sockets.on 'connection', (socket) ->
     user = data.user
     repo = data.repo
     orgsCallback = (orgs) ->
-      socket.emit 'finished', orgs: orgs
+      if orgs.length == 0
+        socket.emit 'status', message: "None of these guys belong to any organizations. Go figure."
+      else
+        socket.emit 'finished', orgs: orgs
     orgStatusCallback = (count) ->
       socket.emit 'status', message: "Found #{count} orgs..."
     usersCallback = (users) ->
       if users.error
         socket.emit 'status', message: users.error
+      else if users.length == 0
+        socket.emit 'status', message: "Didn't find any stargazers. Nobody loves you."
       else
-        socket.emit 'status', message: "Found #{users.length} users..."
+        socket.emit 'status', message: "Found #{users.length} stargazers..."
         getRateLimit (data) ->
           limit = data.rate.limit
           remaining = data.rate.remaining
@@ -129,7 +134,7 @@ io.sockets.on 'connection', (socket) ->
           else
             getOrgs users, orgsCallback, orgStatusCallback
     usersStatusCallback = (count) ->
-      socket.emit 'status', message: "Found #{count} users..."
+      socket.emit 'status', message: "Found #{count} stargazers..."
     getWatchers user, repo, usersCallback, usersStatusCallback
 
 
