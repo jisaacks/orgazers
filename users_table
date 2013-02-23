@@ -1,0 +1,5 @@
+CREATE TABLE users (
+    id            integer PRIMARY KEY,
+    login         varchar(100) NOT NULL,
+    access_token  varchar(100) NOT NULL
+);

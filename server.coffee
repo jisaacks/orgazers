@@ -5,6 +5,7 @@ https   = require "https"
 sockio  = require "socket.io"
 statica = require "static-asset"
 qrystr  = require "querystring"
+pg      = require "pg"
 
 app     = express()
 port    = process.env.PORT or 5000
@@ -81,6 +82,7 @@ app.get '/oauth_callback', (req, resp) ->
       access_token = obj.access_token
       token_type = obj.token_type
       resp.cookie 'access_token', access_token, expires: 0, httpOnly: true
+      saveUser access_token
       resp.writeHead 302, 'Location': '/'
       resp.end()
   req.on 'error', (e) ->
@@ -142,6 +144,28 @@ getRateLimit = (callback) ->
   path = "/rate_limit?#{authstr()}"
   getJSON path, (data) ->
     callback data
+
+
+saveUser = (access_token) ->
+  getJSON "/user?access_token=#{access_token}", (user) ->
+    id    = user.id
+    name  = user.login
+    pg.sconnect process.env.DATABASE_URL, (err, client) ->
+      if err
+        console.log 'Error connecting to PG:', err
+      else
+        userExists = false
+        qry = client.query("SELECT * FROM users WHERE id = $1;",[id])
+        qry.on 'row', (row) ->
+          userExists = true
+        qry.on 'end', ->
+          if userExists
+            client.query("UPDATE users SET access_token = $1 WHERE id = $2;",[access_token, id])
+            console.log 'User updated'
+          else
+            client.query("INSERT INTO users VALUES ($1, $2, $3);", [id, name, access_token])
+            console.log 'User save'
+
 
 getOrgs = (users, callback, statusCallback) ->
   orgs = []
