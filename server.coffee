@@ -12,6 +12,9 @@ port    = process.env.PORT or 5000
 server  = app.listen port, -> console.log "Listening on " + port
 io      = sockio.listen server
 
+
+
+
 app.use statica(__dirname + "/public/")
 app.use express.static(__dirname + "/public/")
 app.use express.cookieParser()
@@ -150,21 +153,19 @@ saveUser = (access_token) ->
   getJSON "/user?access_token=#{access_token}", (user) ->
     id    = user.id
     name  = user.login
-    pg.sconnect process.env.DATABASE_URL, (err, client) ->
-      if err
-        console.log 'Error connecting to PG:', err
+    client = new pg.native.Client(process.env.DATABASE_URL)
+    client.connect()
+    userExists = false
+    qry = client.query("SELECT * FROM users WHERE id = $1;",[id])
+    qry.on 'row', (row) ->
+      userExists = true
+    qry.on 'end', ->
+      if userExists
+        client.query("UPDATE users SET access_token = $1 WHERE id = $2;",[access_token, id])
+        console.log 'User updated'
       else
-        userExists = false
-        qry = client.query("SELECT * FROM users WHERE id = $1;",[id])
-        qry.on 'row', (row) ->
-          userExists = true
-        qry.on 'end', ->
-          if userExists
-            client.query("UPDATE users SET access_token = $1 WHERE id = $2;",[access_token, id])
-            console.log 'User updated'
-          else
-            client.query("INSERT INTO users VALUES ($1, $2, $3);", [id, name, access_token])
-            console.log 'User save'
+        client.query("INSERT INTO users VALUES ($1, $2, $3);", [id, name, access_token])
+        console.log 'User save'
 
 
 getOrgs = (users, callback, statusCallback) ->
